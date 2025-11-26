@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Church Metrics Dashboard</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #4a90e2;
+      --light-bg: #f7fafc;
+      --text-dark: #2d3748;
+      --text-light: #718096;
+      --card-radius: 12px;
+      --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: var(--light-bg);
+      margin: 0;
+      padding: 20px;
+      color: var(--text-dark);
+    }
+
+    h1, h2 {
+      color: var(--primary);
+    }
+
+    .year-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .year-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--card-radius);
+      cursor: pointer;
+      background-color: var(--secondary);
+      color: white;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+
+    .year-btn.active {
+      background-color: var(--primary);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .metric-card {
+      background: white;
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .metric-card h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-value {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .chart-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 0.9rem;
+      color: var(--text-light);
+    }
+
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      width: 100%;
+      height: 200px;
+      padding-top: 10px;
+      border-left: 1px solid #cbd5e0;
+      border-bottom: 1px solid #cbd5e0;
+    }
+
+    .bar {
+      flex: 1;
+      background-color: var(--secondary);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.3s;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      color: white;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Church Metrics Dashboard</h1>
+
+  <div class="year-selector">
+    <button class="year-btn active" data-fy="2024">FY24</button>
+    <button class="year-btn" data-fy="2025">FY25</button>
+    <button class="year-btn" data-fy="2026">FY26</button>
+  </div>
+
+  <div class="metrics-grid">
+
+    <!-- Attendance Card -->
+    <div class="metric-card">
+      <h3>Attendance</h3>
+      <div class="metric-row" data-category="auditorium" data-time="800">
+        <span>8:00am</span>
+        <span class="metric-value">0</span>
+      </div>
+      <div class="metric-row" data-category="auditorium" data-time="930">
+        <span>9:30am</span>
+        <span class="metric-value">0</span>
+      </div>
+      <div class="metric-row" data-category="auditorium" data-time="1100">
+        <span>11:00am</span>
+        <span class="metric-value">0</span>
+      </div>
+      <div class="metric-row" data-category="auditorium" data-time="total">
+        <span>Total</span>
+        <span class="metric-value" id="combined-total">0</span>
+      </div>
+    </div>
+
+    <!-- Online Attendance Card -->
+    <div class="metric-card">
+      <h3>Online Attendance</h3>
+      <div class="metric-row">
+        <span>Total Online</span>
+        <span class="metric-value" id="online-total">0</span>
+      </div>
+    </div>
+
+    <!-- Baptisms Card -->
+    <div class="metric-card">
+      <h3>Baptisms</h3>
+      <div class="metric-row">
+        <span>Total</span>
+        <span class="metric-value" id="baptisms-total">0</span>
+      </div>
+    </div>
+
+    <!-- First Time Guests Card -->
+    <div class="metric-card">
+      <h3>First Time Guests</h3>
+      <div class="metric-row">
+        <span>Total</span>
+        <span class="metric-value" id="ftg-total">0</span>
+      </div>
+      <div class="metric-row">
+        <span>Weekly Avg</span>
+        <span class="metric-value" id="ftg-weekly">0</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Mock Data Example
+    const mockData = {
+      2024: {
+        auditorium: {800: 287, 930: 412, 1100: 356, total: 1055},
+        combined: 1055,
+        baptisms: 14,
+        ftgTotal: 220,
+        ftgWeekly: 55,
+        onlineTotal: 320
+      },
+      2025: {
+        auditorium: {800: 300, 930: 400, 1100: 360, total: 1060},
+        combined: 1060,
+        baptisms: 18,
+        ftgTotal: 240,
+        ftgWeekly: 60,
+        onlineTotal: 350
+      },
+      2026: {
+        auditorium: {800: 310, 930: 420, 1100: 380, total: 1110},
+        combined: 1110,
+        baptisms: 20,
+        ftgTotal: 260,
+        ftgWeekly: 65,
+        onlineTotal: 370
+      }
+    };
+
+    function updateDashboardData(year) {
+      const data = mockData[year];
+
+      document.querySelectorAll('.metric-row[data-category]').forEach(row => {
+        const cat = row.dataset.category;
+        const time = row.dataset.time;
+        if (data[cat] && data[cat][time] !== undefined) {
+          row.querySelector('.metric-value').textContent = data[cat][time].toLocaleString();
+        }
+      });
+
+      document.getElementById('combined-total').textContent = data.combined.toLocaleString();
+      document.getElementById('baptisms-total').textContent = data.baptisms.toLocaleString();
+      document.getElementById('ftg-total').textContent = data.ftgTotal.toLocaleString();
+      document.getElementById('online-total').textContent = data.onlineTotal.toLocaleString();
+      document.getElementById('ftg-weekly').textContent = data.ftgWeekly.toLocaleString();
+    }
+
+    // Year button click handler
+    document.querySelector('.year-selector').addEventListener('click', e => {
+      if (e.target.classList.contains('year-btn')) {
+        document.querySelectorAll('.year-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+        updateDashboardData(parseInt(e.target.dataset.fy));
+      }
+    });
+
+    // Initialize dashboard
+    updateDashboardData(2024);
+  </script>
+
+</body>
+</html>
